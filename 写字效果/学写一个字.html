@@ -1,0 +1,317 @@
+
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width"/>
+		<title></title>
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+				border: 0;
+			}
+			
+			ul {
+				margin-top: 30px;
+				margin-left: 30px;
+				/*width: 200px;*/
+				height: 50px;
+				display: flex;
+				justify-content: space-around;
+				list-style: none;
+			}
+			/*li {
+				list-style: none;
+				width: 20px;
+				height: 20px;
+				border-radius: 5px;
+			}
+			
+			.list1 {
+				background-color: red;
+			}
+			
+			.list2 {
+				background-color: yellow;
+			}
+			
+			.list3 {
+				background-color: pink;
+			}
+			
+			.list4 {
+				background-color: orange;
+			}
+			
+			.list5 {
+				background-color: blue;
+			}
+			
+			.list:hover {
+				border: 5px solid greenyellow;
+			}*/
+			
+			p {
+				width: 60px;
+				height: 30px;
+				margin-left: 400px;
+				/*margin-top: -60px;*/
+				background-color: #CCCCCC;
+				text-align: center;
+				line-height: 30px;
+			}
+			
+			p:hover {
+				background-color: lightblue;
+			}
+			
+			.color_btn {
+				float: left;
+				border: 5px solid white;
+				width: 20px;
+				height: 20px;
+				border-radius: 5px 5px;
+				cursor: pointer;
+			}
+			
+			.color_btn:hover {
+				border: 5px solid violet;
+			}
+			
+			.color_btn_selected {
+				border: 5px solid blueviolet;
+			}
+			
+			#black_btn {
+				background-color: black;
+			}
+			
+			#blue_btn {
+				background-color: blue;
+			}
+			
+			#green_btn {
+				background-color: green;
+			}
+			
+			#red_btn {
+				background-color: red;
+			}
+			
+			#orange_btn {
+				background-color: orange;
+			}
+			
+			#yellow_btn {
+				background-color: yellow;
+			}
+		</style>
+	</head>
+
+	<body>
+		<canvas id="" width="" height=""></canvas>
+		<ul>
+			<li id="black_btn" class="color_btn color_btn_selected"></li>
+			<li id="blue_btn" class="color_btn"></li>
+			<li id="green_btn" class="color_btn"></li>
+			<li id="red_btn" class="color_btn"></li>
+			<li id="orange_btn" class="color_btn"></li>
+			<li id="yellow_btn" class="color_btn"></li>
+
+		</ul>
+		<p onclick="clear()">清除</p>
+	</body>
+	<script src="jquery-3.1.1.min.js"></script>
+	<script type="text/javascript">
+	var aaa = navigator.userAgent;
+	console.log(aaa);
+		var canvas = document.querySelector("canvas");
+		var context = canvas.getContext("2d");
+		var p = document.querySelector("p");
+		//移动端的适配
+		var w=window.innerWidth;
+		console.log(w);
+		var canvasWidth = Math.min( 500 , w - 20 );
+
+		var canvasHeight = canvasWidth;
+		canvas.width = canvasWidth;
+		canvas.height = canvasHeight;
+		console.log(canvasWidth);
+		var isMouseDown = false;
+		var lastLoc = {
+			x: 0,
+			y: 0
+		};
+		var lastTimeStamp = 0;
+		var lastLineWidth = -1;
+		var strokeColor = "black";
+		p.onclick = function() {
+				context.clearRect(0, 0, canvas.width, canvas.height);
+				draw();
+
+			}
+			//
+		$("ul").css("width", canvasWidth + "px");
+
+		$(".color_btn").click(function(e) {
+			$(".color_btn").removeClass("color_btn_selected");
+			$(this).addClass("color_btn_selected");
+			strokeColor = $(this).css("background-color");
+		})
+
+		function draw() {
+			context.save()
+
+			context.beginPath();
+			context.strokeStyle = "red";
+			context.lineWidth = 5;
+			context.strokeRect(1, 1, canvasWidth - 3, canvasHeight - 3);
+
+			context.beginPath();
+			context.lineWidth = 1;
+
+			context.moveTo(0, 0);
+			context.lineTo(canvasWidth, canvasHeight);
+
+			context.moveTo(canvasWidth, 0);
+			context.lineTo(0, canvasHeight);
+
+			context.moveTo(canvasWidth / 2, 0);
+			context.lineTo(canvasWidth / 2, canvasHeight);
+
+			context.moveTo(0, canvasHeight / 2);
+			context.lineTo(canvasWidth, canvasHeight / 2);
+
+			context.stroke();
+			context.restore();
+
+		}
+		draw();
+		//鼠标事件
+		canvas.onmousedown = function(e) {
+			e.preventDefault();
+			beginStroke({
+				x: e.clientX,
+				y: e.clientY
+			});
+		}
+		canvas.onmouseup = function(e) {
+			e.preventDefault();
+			endStroke();
+		}
+		canvas.onmouseout = function(e) {
+			e.preventDefault();
+			endStroke();
+		}
+		canvas.onmousemove = function(e) {
+				e.preventDefault();
+				if(isMouseDown) {
+					moveStroke({
+						x: e.clientX,
+						y: e.clientY
+					});
+				}
+				//
+			}
+			//移动端事件
+		canvas.addEventListener("touchstart", function(e) {
+			e.preventDefault();
+			touch = e.touches[0];
+			beginStroke({
+				x: touch.pageX,
+				y: touch.pageY
+			});
+		}, false)
+		canvas.addEventListener("touchmove", function(e) {
+			e.preventDefault();
+			touch = e.touches[0];
+			if(isMouseDown) {
+				moveStroke({
+					x: touch.pageX,
+					y: touch.pageY
+				});
+			}
+		}, false)
+		canvas.addEventListener("touchend", function(e) {
+			e.preventDefault()
+			endStroke()
+		}, false);
+		//
+		function beginStroke(point) {
+			isMouseDown = true;
+			lastLoc = windowToCanvas(point.x, point.y);
+			var curTimestamp = new Date().getTime();
+		}
+
+		function endStroke() {
+			isMouseDown = false;
+		}
+
+		function moveStroke(point) {
+			var curLoc = windowToCanvas(point.x, point.y);
+			var curTimestamp = new Date().getTime();
+			//路程
+			var s = calcDistance(curLoc, lastLoc);
+			//
+
+			var t = curTimestamp - lastTimeStamp;
+			var lineWidth = calLineWidth(t, s);
+			context.beginPath();
+			context.strokeStyle = strokeColor;
+
+			context.moveTo(lastLoc.x, lastLoc.y);
+			context.lineTo(curLoc.x, curLoc.y);
+			context.lineWidth = lineWidth;
+			context.lineCap = "round";
+			context.lineJoin = "round";
+
+			context.stroke();
+
+			lastLoc = curLoc;
+			lastTimeStamp = curTimestamp;
+			lastLineWidth = lineWidth;
+
+		}
+		var maxLineWidth = 20;
+		var minLineWidth = 1;
+		var maxStrokeV = 10;
+		var minStrokeV = 0.1;
+		//线宽
+		function calLineWidth(t, s) {
+			var v = s / t;
+			var resultLineWidth;
+			//解决平滑问题
+			if(v <= minStrokeV) {
+				resultLineWidth = maxLineWidth;
+
+			} else if(v >= maxStrokeV) {
+				resultLineWidth = minLineWidth;
+			} else {
+				//利用差值
+				resultLineWidth = maxLineWidth - (v - minStrokeV) / (maxStrokeV - minStrokeV) * (maxLineWidth - minLineWidth);
+			}
+			if(lastLineWidth == -1) {
+				return resultLineWidth;
+			} else {
+				//解决平滑问题
+				return lastLineWidth * 2 / 3 + resultLineWidth * 1 / 3;
+			}
+
+		}
+		//两点之间的距离
+		function calcDistance(loc1, loc2) {
+			return Math.sqrt((loc1.x - loc2.x) * (loc1.x - loc2.x) + (loc1.y - loc2.y) * (loc1.y - loc2.y));
+		}
+
+		function windowToCanvas(x, y) {
+			var bbox = canvas.getBoundingClientRect();
+			return {
+				x: Math.round(x - bbox.left),
+				y: Math.round(y - bbox.top)
+			};
+		}
+	</script>
+
+</html>
