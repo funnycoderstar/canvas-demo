@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<title></title>
+		<style type="text/css">
+			* {
+				margin: 0;
+				padding: 0;
+			}
+			
+			.blur {
+				width: 400px;
+				height: 225px;
+				margin: 0 auto;
+				position: relative;
+			}
+			
+			canvas {
+				width: 100%;
+				
+				position: absolute;
+			
+				z-index: 1;
+			}
+			
+			img {
+				-webkit-filter: blur(10px);
+				-ms-filter: blur(10px);
+				filter: blur(10px);
+				position: absolute;
+				z-index: -1;
+				width: 100%;
+				height: 225px;
+			}
+			p{
+				position: absolute;
+				z-index: 3;
+				width: 70px;
+				height: 30px;
+				background-color: lightblue;
+				color: black;
+				line-height: 30px;
+				text-align: center;
+				
+			}
+			.a1{
+				left:50px;
+				bottom: 20px;
+			}
+			.a2{
+				right: 50px;
+				bottom: 20px;
+			}
+			p:hover{
+				background-color: blue;
+				color: white;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="blur">
+			<canvas id="" width="" height=""></canvas>
+			<img src="img/1.jpg" />
+			<p onclick="hide()" class="a1">RESET</p>
+			<p onclick="show()" class="a2">SHOW</p>
+		</div>
+	</body>
+	<script type="text/javascript">
+	var canvasWidth=400;
+	var canvasHeight=225;
+	var radius=50;
+		var canvas = document.querySelector("canvas");
+		var context = canvas.getContext("2d");
+		canvas.width=canvasWidth;
+		canvas.height=canvasHeight;
+		var img = new Image();
+		img.src="img/1.jpg";
+		var data={x:50,y:50,r:radius};	
+		img.onload=function(){
+			initCanvas();
+		}
+//	
+		function initCanvas(){
+			data={x:Math.random()*(canvas.width-2*radius)+radius,y:Math.random()*(canvas.height-2*radius)+radius,r:radius};
+			drawImg(img,data);
+		}
+		//画图
+		function setCircle(data){
+			context.beginPath();
+			context.arc(data.x,data.y,data.r,0,Math.PI*2,true);
+			context.clip();
+		}
+		function drawImg(img,data){
+			context.clearRect(0,0,canvas.width,canvas.height);
+			context.save();
+			setCircle(data);
+			context.drawImage(img,0,0);
+			context.restore();
+		}
+		function show(){
+			var timer=setInterval(function(){
+				data.r+=10;
+				if(data.r>400){
+					clearInterval(timer);
+				}
+			drawImg(img,data);
+			},30);	
+		}
+		function hide(){
+		initCanvas();
+			}
+	</script>
+
+</html>
